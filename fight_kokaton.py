@@ -159,6 +159,29 @@ class Score:
         """
         self.img = self.fonto.render(f"Score: {self.value}", 0, self.color)
         screen.blit(self.img, self.rct)
+class Explosion:
+    """
+    爆発エフェクトに関するクラス
+    """
+    def __init__(self, bomb: Bomb):
+        """
+        爆発した爆弾の位置に爆発画像を用意する
+        引数 bomb：爆発した爆弾（Bombインスタンス）
+        """
+        img = pg.image.load("fig/explosion.gif")
+        self.imgs = [img, pg.transform.flip(img, True, True)]  # 上下左右にflip
+        self.rct = self.imgs[0].get_rect()
+        self.rct.center = bomb.rct.center
+        self.life = 30  # 表示時間（フレーム数）
+
+    def update(self, screen: pg.Surface):
+        """
+        爆発時間を1減らし，5フレームごとに画像を切り替えて爆発を演出する
+        引数 screen：画面Surface
+        """
+        self.life -= 1
+        if self.life > 0:
+            screen.blit(self.imgs[self.life // 5 % 2], self.rct)
 
 
 def main():
@@ -169,6 +192,7 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beams = []  # 複数のビームを入れるリスト
     score = Score()
+    exps = []  # 爆発エフェクトのリスト
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -185,6 +209,7 @@ def main():
             for j, beam in enumerate(beams):
                 if bombs[i] is not None and beams[j] is not None:
                     if beam.rct.colliderect(bomb.rct):
+                        exps.append(Explosion(bomb))  # 爆発エフェクト
                         beams[j], bombs[i] = None, None
                         bird.change_img(6, screen)  # 練習3：喜ぶ
                         score.value += 1  # スコアアップ
@@ -192,6 +217,7 @@ def main():
         # Noneでなく，画面内にあるビームだけ残す
         beams = [beam for beam in beams
                  if beam is not None and check_bound(beam.rct) == (True, True)]
+        exps = [exp for exp in exps if exp.life > 0]
 
         # こうかとんと爆弾の衝突判定
         for bomb in bombs:
@@ -212,7 +238,9 @@ def main():
             beam.update(screen)
         for bomb in bombs:
             bomb.update(screen)
-        score.update(screen)  # ← 毎フレームスコアを表示
+        for exp in exps:
+            exp.update(screen)  # 爆発を描画
+        score.update(screen)  # 毎フレームスコアを表示
         pg.display.update()
         tmr += 1
         clock.tick(50)
