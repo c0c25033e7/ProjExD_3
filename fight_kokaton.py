@@ -151,6 +151,9 @@ class Score:
     落とした爆弾の数を表示するクラス
     """
     def __init__(self):
+        """
+        スコア表示用のフォントや文字色，初期値を設定する
+        """
         self.fonto = pg.font.Font(None,50)
         self.color =(0,0,255)  #青色
         self.value = 0
@@ -180,7 +183,7 @@ class Explosion:
         self.imgs = [img, pg.transform.flip(img, True, True)]  # 上下左右にflip
         self.rct = self.imgs[0].get_rect()
         self.rct.center = bomb.rct.center
-        self.life = 30  # 表示時間（フレーム数）
+        self.life = 30  # 表示時間
 
     def update(self, screen: pg.Surface):
         """
@@ -222,7 +225,7 @@ def main():
                         bird.change_img(6, screen)  # 練習3：喜ぶ
                         score.value += 1  # スコアアップ
         bombs = [bomb for bomb in bombs if bomb is not None]
-        # Noneでなく，画面内にあるビームだけ残す
+        # 画面内にあるビームだけ残す
         beams = [beam for beam in beams
                  if beam is not None and check_bound(beam.rct) == (True, True)]
         exps = [exp for exp in exps if exp.life > 0]
