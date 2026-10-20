@@ -140,7 +140,25 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+class Score:
+    """
+    落とした爆弾の数を表示するクラス
+    """
+    def __init__(self):
+        self.fonto = pg.font.Font(None,50)
+        self.color =(0,0,255)  #青色
+        self.value = 0
+        self.img = self.fonto.render(f"Score: {self.value}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50) #画面左下に表示
 
+    def update(self, screen:pg.surface):
+        """
+        スコアを表示する文字列Surfaceを生成し，画面に転送する
+        引数 screen：画面Surface
+        """
+        self.img = self.fonto.render(f"Score: {self.value}", 0, self.color)
+        screen.blit(self.img, self.rct)
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -149,6 +167,7 @@ def main():
     bird = Bird((300, 200))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beam = None  # ゲーム初期化時にはビームは存在しない
+    score = Score()
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -173,6 +192,7 @@ def main():
                 if beam.rct.colliderect(bomb.rct):
                     beam, bombs[i] = None, None
                     bird.change_img(6, screen)  # 練習3：喜ぶ
+                    score.value += 1 #カウント追加
         bombs = [bomb for bomb in bombs if bomb is not None]
 
         # こうかとんと爆弾の衝突判定
@@ -183,6 +203,7 @@ def main():
                 fonto = pg.font.Font(None, 80)  # 練習4：Game Over
                 txt = fonto.render("Game Over", True, (255, 0, 0))
                 screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+                score.update(screen)
                 pg.display.update()
                 time.sleep(1)
                 return       
